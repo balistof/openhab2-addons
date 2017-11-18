@@ -17,15 +17,25 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  *
  * @author Daniel Weisser - Initial contribution
  */
- @NonNullByDefault
+@NonNullByDefault
 public class SomfyCULBindingConstants {
 
     private static final String BINDING_ID = "somfycul";
 
     // List of all Thing Type UIDs
-    public static final ThingTypeUID THING_TYPE_SAMPLE = new ThingTypeUID(BINDING_ID, "sample");
+    /**
+     * CUL stick
+     */
+    public static final ThingTypeUID CUL_DEVICE_THING_TYPE = new ThingTypeUID(BINDING_ID, "culdevice");
 
-    // List of all Channel ids
-    public static final String CHANNEL_1 = "channel1";
+    /**
+     * Somfy Device (e.g. rollershutter)
+     */
+    public static final ThingTypeUID SOMFY_DEVICE_THING_TYPE = new ThingTypeUID(BINDING_ID, "somfydevice");
+
+    /**
+     * Rollershutter's position
+     */
+    public static final String POSITION = "position";
 
 }

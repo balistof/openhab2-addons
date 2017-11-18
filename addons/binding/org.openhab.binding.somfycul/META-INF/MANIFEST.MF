@@ -11,6 +11,8 @@ Export-Package:
  org.openhab.binding.somfycul,
  org.openhab.binding.somfycul.handler
 Import-Package: 
+ com.google.common.base,
+ com.google.common.collect,
  org.openhab.binding.somfycul,
  org.openhab.binding.somfycul.handler,
  org.eclipse.jdt.annotation;resolution:=optional,

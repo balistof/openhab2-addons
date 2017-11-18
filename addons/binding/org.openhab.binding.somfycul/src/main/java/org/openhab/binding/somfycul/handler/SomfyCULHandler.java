@@ -8,7 +8,7 @@
  */
 package org.openhab.binding.somfycul.handler;
 
-import static org.openhab.binding.somfycul.SomfyCULBindingConstants.*;
+import static org.openhab.binding.somfycul.SomfyCULBindingConstants.POSITION;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel Weisser - Initial contribution
  */
- @NonNullByDefault
+@NonNullByDefault
 public class SomfyCULHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(SomfyCULHandler.class);
@@ -36,7 +36,7 @@ public class SomfyCULHandler extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (channelUID.getId().equals(CHANNEL_1)) {
+        if (channelUID.getId().equals(POSITION)) {
             // TODO: handle command
 
             // Note: if communication with thing fails for some reason,
