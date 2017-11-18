@@ -30,6 +30,8 @@ public class CulHandler extends BaseBridgeHandler {
     @Override
     public void initialize() {
         logger.info("Set CUL stick online");
+
+        // TODO Check CUL version! - UrtsiDeviceHandler
         updateStatus(ThingStatus.ONLINE);
     }
 

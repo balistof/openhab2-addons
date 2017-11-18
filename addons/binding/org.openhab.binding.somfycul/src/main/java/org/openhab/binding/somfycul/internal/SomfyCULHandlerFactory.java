@@ -21,6 +21,7 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.somfycul.handler.CulHandler;
+import org.openhab.binding.somfycul.handler.SomfyCULHandler;
 import org.osgi.service.component.annotations.Component;
 
 import com.google.common.collect.Lists;
@@ -50,7 +51,7 @@ public class SomfyCULHandlerFactory extends BaseThingHandlerFactory {
         if (thingTypeUID.equals(CUL_DEVICE_THING_TYPE) && thing instanceof Bridge) {
             return new CulHandler((Bridge) thing);
         } else if (thingTypeUID.equals(SOMFY_DEVICE_THING_TYPE)) {
-            return null; // new RtsDeviceHandler(thing);
+            return new SomfyCULHandler(thing);
         }
 
         return null;
