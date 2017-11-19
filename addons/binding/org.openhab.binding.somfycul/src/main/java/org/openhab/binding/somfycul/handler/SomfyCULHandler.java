@@ -15,7 +15,9 @@ import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
+import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +46,15 @@ public class SomfyCULHandler extends BaseThingHandler {
             // indicate that by setting the status with detail information
             // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
             // "Could not control device at IP address x.x.x.x");
+        }
+
+        // We delegate the execution to the bridge handler
+        ThingHandler bridgeHandler = getBridge().getHandler();
+        if (bridgeHandler instanceof CulHandler) {
+            boolean executedSuccessfully = ((CulHandler) bridgeHandler).executeCULCommand(getThing());
+            if (executedSuccessfully && command instanceof State) {
+                updateState(channelUID, (State) command);
+            }
         }
     }
 

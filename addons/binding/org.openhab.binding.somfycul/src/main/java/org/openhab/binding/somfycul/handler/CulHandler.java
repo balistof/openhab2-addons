@@ -72,7 +72,7 @@ public class CulHandler extends BaseBridgeHandler {
      * @param rtsCommand the command to be executed
      * @return
      */
-    public boolean executeRtsCommand(Thing rtsDevice) { // , RtsCommand rtsCommand) {
+    public boolean executeCULCommand(Thing rtsDevice) { // , RtsCommand rtsCommand) {
         // RtsDeviceConfig rtsDeviceConfig = rtsDevice.getConfiguration().as(RtsDeviceConfig.class);
         // String mappedChannel = UrtsiChannelMapping.getMappedChannel(rtsDeviceConfig.channel);
         // if (mappedChannel == null) {
@@ -80,6 +80,7 @@ public class CulHandler extends BaseBridgeHandler {
         // }
         // String urtsiCommand = new StringBuilder(address).append(mappedChannel).append(rtsCommand.getActionKey())
         // .toString();
+        logger.info("Send message for thing {}", rtsDevice.getLabel());
         boolean executedSuccessfully = writeString("");
         return executedSuccessfully;
     }
