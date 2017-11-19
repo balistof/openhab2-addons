@@ -11,6 +11,8 @@ package org.openhab.binding.somfycul.handler;
 import static org.openhab.binding.somfycul.SomfyCULBindingConstants.POSITION;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.core.library.types.StopMoveType;
+import org.eclipse.smarthome.core.library.types.UpDownType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -40,27 +42,53 @@ public class SomfyCULHandler extends BaseThingHandler {
     public void handleCommand(ChannelUID channelUID, Command command) {
         logger.info("channelUID: " + channelUID + ", command: " + command);
         if (channelUID.getId().equals(POSITION)) {
-            // TODO: handle command - proper implementation of programming?
+            SomfyCommand somfyCommand = null;
+            if (command instanceof UpDownType) {
+                switch ((UpDownType) command) {
+                    case UP:
+                        somfyCommand = SomfyCommand.UP;
+                        break;
+                    case DOWN:
+                        somfyCommand = SomfyCommand.DOWN;
+                        break;
+                }
+            } else if (command instanceof StopMoveType) {
+                switch ((StopMoveType) command) {
+                    case STOP:
+                        somfyCommand = SomfyCommand.MY;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if (somfyCommand != null) {
 
-            // Note: if communication with thing fails for some reason,
-            // indicate that by setting the status with detail information
-            // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-            // "Could not control device at IP address x.x.x.x");
-        }
+                // thing.setProperty("RollingCode", "0000");
+                // TODO Build the complete command with rolling code
+                // thing.getConfiguration().put("RollingCode", "0000");
 
-        // We delegate the execution to the bridge handler
-        ThingHandler bridgeHandler = getBridge().getHandler();
-        if (bridgeHandler instanceof CulHandler) {
-            boolean executedSuccessfully = ((CulHandler) bridgeHandler).executeCULCommand(getThing());
-            if (executedSuccessfully && command instanceof State) {
-                updateState(channelUID, (State) command);
+                // We delegate the execution to the bridge handler
+                ThingHandler bridgeHandler = getBridge().getHandler();
+                if (bridgeHandler instanceof CulHandler) {
+                    boolean executedSuccessfully = ((CulHandler) bridgeHandler).executeCULCommand(getThing(),
+                            somfyCommand);
+                    if (executedSuccessfully && command instanceof State) {
+                        updateState(channelUID, (State) command);
+                        // Update rolling code
+                        int rollCode = Integer.parseInt(thing.getConfiguration().get("RollingCode").toString());
+                        rollCode++;
+                        thing.getConfiguration().put("RollingCode", rollCode + "");
+                        logger.debug("Updated rolling code to {}", rollCode);
+                    }
+                }
             }
         }
+
     }
 
     @Override
     public void initialize() {
-        // TODO: Thing should only be initialized after proper programming
+        // TODO: Thing should only be initialized after proper programming and rolling code be set.
         logger.info("Added roler shutter");
         updateStatus(ThingStatus.ONLINE);
 

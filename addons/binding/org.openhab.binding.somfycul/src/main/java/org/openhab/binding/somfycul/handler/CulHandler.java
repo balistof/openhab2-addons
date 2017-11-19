@@ -66,13 +66,14 @@ public class CulHandler extends BaseBridgeHandler {
     }
 
     /**
-     * Executes the given {@link RtsCommand} for the given {@link Thing} (RTS Device).
+     * Executes the given {@link SomfyCommand} for the given {@link Thing} (RTS Device).
      *
-     * @param rtsDevice the RTS Device which is the receiver of the command.
+     * @param somfyDevice the RTS Device which is the receiver of the command.
+     * @param somfyCommand
      * @param rtsCommand the command to be executed
      * @return
      */
-    public boolean executeCULCommand(Thing rtsDevice) { // , RtsCommand rtsCommand) {
+    public boolean executeCULCommand(Thing somfyDevice, SomfyCommand somfyCommand) { // , RtsCommand rtsCommand) {
         // RtsDeviceConfig rtsDeviceConfig = rtsDevice.getConfiguration().as(RtsDeviceConfig.class);
         // String mappedChannel = UrtsiChannelMapping.getMappedChannel(rtsDeviceConfig.channel);
         // if (mappedChannel == null) {
@@ -80,9 +81,10 @@ public class CulHandler extends BaseBridgeHandler {
         // }
         // String urtsiCommand = new StringBuilder(address).append(mappedChannel).append(rtsCommand.getActionKey())
         // .toString();
-        logger.info("Send message for thing {}", rtsDevice.getLabel());
+        logger.info("Send message {} for thing {}", somfyCommand, somfyDevice.getLabel());
         boolean executedSuccessfully = writeString("");
-        return executedSuccessfully;
+        // return executedSuccessfully;
+        return true;
     }
 
     /**
