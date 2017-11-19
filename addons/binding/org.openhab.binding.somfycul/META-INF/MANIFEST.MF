@@ -13,8 +13,8 @@ Export-Package:
 Import-Package: 
  com.google.common.base,
  com.google.common.collect,
- org.openhab.binding.somfycul,
- org.openhab.binding.somfycul.handler,
+ gnu.io,
+ org.apache.commons.io,
  org.eclipse.jdt.annotation;resolution:=optional,
  org.eclipse.smarthome.config.core,
  org.eclipse.smarthome.core.library.types,
@@ -23,6 +23,8 @@ Import-Package:
  org.eclipse.smarthome.core.thing.binding.builder,
  org.eclipse.smarthome.core.thing.type,
  org.eclipse.smarthome.core.types,
+ org.openhab.binding.somfycul,
+ org.openhab.binding.somfycul.handler,
  org.osgi.service.component.annotations;resolution:=optional,
  org.slf4j
 Service-Component: OSGI-INF/*.xml
