@@ -85,8 +85,8 @@ public class SomfyCULHandler extends BaseThingHandler {
                     logger.debug("rolling code before command {}", rollingCode);
 
                     boolean executedSuccessfully = ((CulHandler) bridgeHandler).executeCULCommand(getThing(),
-                            somfyCommand);
-                    if (true && command instanceof State) {
+                            somfyCommand, rollingCode, address);
+                    if (executedSuccessfully && command instanceof State) {
                         updateState(channelUID, (State) command);
 
                         long rollCode = Long.decode("0x" + rollingCode);
@@ -101,7 +101,6 @@ public class SomfyCULHandler extends BaseThingHandler {
                 }
             }
         }
-
     }
 
     private void storeProperties(Properties p) {
@@ -112,7 +111,6 @@ public class SomfyCULHandler extends BaseThingHandler {
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
-
     }
 
     private Properties loadProperties() {
