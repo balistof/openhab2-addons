@@ -10,7 +10,14 @@ package org.openhab.binding.somfycul.handler;
 
 import static org.openhab.binding.somfycul.SomfyCULBindingConstants.POSITION;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Properties;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.core.library.types.StopMoveType;
 import org.eclipse.smarthome.core.library.types.UpDownType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -23,6 +30,8 @@ import org.eclipse.smarthome.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.Files;
+
 /**
  * The {@link SomfyCULHandler} is responsible for handling commands, which are
  * sent to one of the channels.
@@ -33,9 +42,12 @@ import org.slf4j.LoggerFactory;
 public class SomfyCULHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(SomfyCULHandler.class);
+    private File propertyFile;
 
     public SomfyCULHandler(Thing thing) {
         super(thing);
+        propertyFile = new File(ConfigConstants.getUserDataFolder() + File.separator + "somfycul" + File.separator
+                + thing.getUID().getAsString().replace(':', '_') + ".properties");
     }
 
     @Override
@@ -62,28 +74,68 @@ public class SomfyCULHandler extends BaseThingHandler {
                 }
             }
             if (somfyCommand != null) {
-
-                // thing.setProperty("RollingCode", "0000");
-                // TODO Build the complete command with rolling code
-                // thing.getConfiguration().put("RollingCode", "0000");
+                // Get config for this roller shutter - save rollingCode and address
+                Properties p = loadProperties();
 
                 // We delegate the execution to the bridge handler
                 ThingHandler bridgeHandler = getBridge().getHandler();
                 if (bridgeHandler instanceof CulHandler) {
+                    String rollingCode = p.getProperty("rollingCode", "0000");
+                    String address = p.getProperty("address", "000000");
+                    logger.debug("rolling code before command {}", rollingCode);
+
                     boolean executedSuccessfully = ((CulHandler) bridgeHandler).executeCULCommand(getThing(),
                             somfyCommand);
-                    if (executedSuccessfully && command instanceof State) {
+                    if (true && command instanceof State) {
                         updateState(channelUID, (State) command);
-                        // Update rolling code
-                        int rollCode = Integer.parseInt(thing.getConfiguration().get("RollingCode").toString());
+
+                        long rollCode = Long.decode("0x" + rollingCode);
                         rollCode++;
-                        thing.getConfiguration().put("RollingCode", rollCode + "");
-                        logger.debug("Updated rolling code to {}", rollCode);
+                        rollingCode = String.format("%04X", rollCode);
+                        logger.debug("Updated rolling code to {}", rollingCode);
+                        p.setProperty("rollingCode", rollingCode);
+                        p.setProperty("address", address);
+
+                        storeProperties(p);
                     }
                 }
             }
         }
 
+    }
+
+    private void storeProperties(Properties p) {
+        try {
+            FileWriter fileWriter = new FileWriter(propertyFile);
+            p.store(fileWriter, "no comment");
+            fileWriter.close();
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+    }
+
+    private Properties loadProperties() {
+        Properties p = new Properties();
+
+        if (!propertyFile.exists()) {
+            // TODO Create file during programming the shutter
+            try {
+                logger.debug("Trying to create file {}.", propertyFile);
+                Files.createParentDirs(propertyFile);
+                Files.touch(propertyFile);
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        try {
+            FileReader fileReader = new FileReader(propertyFile);
+            p.load(fileReader);
+            fileReader.close();
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return p;
     }
 
     @Override

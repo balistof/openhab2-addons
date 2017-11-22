@@ -12,6 +12,7 @@ Export-Package:
  org.openhab.binding.somfycul.handler
 Import-Package: 
  com.google.common.base,
+ com.google.common.io,
  com.google.common.collect,
  gnu.io,
  org.apache.commons.io,
