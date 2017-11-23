@@ -1,12 +1,9 @@
 package org.openhab.binding.somfycul.handler;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -27,8 +24,6 @@ import com.google.common.collect.Sets;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
 
 /**
  * The {@link CulHandler} is responsible for handling commands, which are
@@ -101,54 +96,12 @@ public class CulHandler extends BaseBridgeHandler {
             }
         }
         try {
-            final List<Boolean> listenerResult = new ArrayList<Boolean>();
-            serialPort.addEventListener(new SerialPortEventListener() {
-                @Override
-                public void serialEvent(SerialPortEvent event) {
-                    if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-                        // we get here if data has been received
-                        final StringBuilder sb = new StringBuilder();
-                        final byte[] readBuffer = new byte[20];
-                        try {
-                            do {
-                                // read data from serial device
-                                while (inputStream.available() > 0) {
-                                    final int bytes = inputStream.read(readBuffer);
-                                    sb.append(new String(readBuffer, 0, bytes));
-                                }
-                                try {
-                                    // add wait states around reading the stream, so that interrupted transmissions are
-                                    // merged
-                                    Thread.sleep(100);
-                                } catch (InterruptedException e) {
-                                    // ignore interruption
-                                }
-                            } while (inputStream.available() > 0);
-                            final String result = sb.toString();
-                            if (result.equals(msg)) {
-                                listenerResult.add(true);
-                            }
-                        } catch (IOException e) {
-                            logger.debug("Error receiving data on serial port {}: {}", portId.getName(),
-                                    e.getMessage());
-                        }
-                    }
-                }
-            });
-            serialPort.notifyOnDataAvailable(true);
             outputStream.write(msg.getBytes());
             outputStream.flush();
             lastCommandTime = System.currentTimeMillis();
-            final long timeout = lastCommandTime + 1000;
-            while (listenerResult.isEmpty() && System.currentTimeMillis() < timeout) {
-                // Waiting for response
-                Thread.sleep(100);
-            }
-            return !listenerResult.isEmpty();
+            return true;
         } catch (Exception e) {
             logger.error("Error writing '{}' to serial port {}: {}", msg, portId.getName(), e.getMessage());
-        } finally {
-            serialPort.removeEventListener();
         }
         return false;
     }
