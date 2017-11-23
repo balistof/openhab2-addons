@@ -69,10 +69,9 @@ public class CulHandler extends BaseBridgeHandler {
      */
     public boolean executeCULCommand(Thing somfyDevice, SomfyCommand somfyCommand, String rollingCode, String adress) {
 
-        String culCommand = "Ys" + "A1" + somfyCommand.getActionKey() + "0" + rollingCode + adress + "\n";
+        String culCommand = "Ys" + "A1" + somfyCommand.getActionKey() + "0" + rollingCode + adress;
         logger.info("Send message {} for thing {}", culCommand, somfyDevice.getLabel());
-        boolean executedSuccessfully = writeString(culCommand);
-        return executedSuccessfully;
+        return writeString(culCommand);
     }
 
     /**
@@ -85,8 +84,9 @@ public class CulHandler extends BaseBridgeHandler {
      * @return true, if the message has been transmitted successfully, otherwise false.
      */
     protected synchronized boolean writeString(final String msg) {
-        logger.debug("Writing '{}' to serial port {}", msg, portId.getName());
+        logger.debug("Trying to write '{}' to serial port {}", msg, portId.getName());
 
+        // TODO Check for status of bridge
         final long earliestNextExecution = lastCommandTime + 100;
         while (earliestNextExecution > System.currentTimeMillis()) {
             try {
@@ -96,7 +96,7 @@ public class CulHandler extends BaseBridgeHandler {
             }
         }
         try {
-            outputStream.write(msg.getBytes());
+            outputStream.write((msg + "\n").getBytes());
             outputStream.flush();
             lastCommandTime = System.currentTimeMillis();
             return true;
