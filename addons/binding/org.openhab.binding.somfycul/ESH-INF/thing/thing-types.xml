@@ -25,12 +25,6 @@
 		<channels>
 			<channel id="position" typeId="position" />
 		</channels>
-		<config-description>
-			<parameter name="channel" type="text" pattern="([0-9]|[A-F]|[a-f])">
-				<label>somfyDeviceChannelLabel</label>
-				<description>somfyDeviceChannelDescription</description>
-			</parameter>
-		</config-description>
 	</thing-type>
 	
     <channel-type id="position">
