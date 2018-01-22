@@ -43,11 +43,19 @@ public class SomfyCULHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(SomfyCULHandler.class);
     private File propertyFile;
+    private Properties p;
 
+    /**
+     * Initializes the thing. As persistent state is necessary the properties are stored in the user data directory and
+     * fetched within the constructor.
+     *
+     * @param thing
+     */
     public SomfyCULHandler(Thing thing) {
         super(thing);
         propertyFile = new File(ConfigConstants.getUserDataFolder() + File.separator + "somfycul" + File.separator
                 + thing.getUID().getAsString().replace(':', '_') + ".properties");
+        p = initProperties();
     }
 
     @Override
@@ -74,14 +82,11 @@ public class SomfyCULHandler extends BaseThingHandler {
                 }
             }
             if (somfyCommand != null) {
-                // Get config for this roller shutter - save rollingCode and address
-                Properties p = loadProperties();
-
                 // We delegate the execution to the bridge handler
                 ThingHandler bridgeHandler = getBridge().getHandler();
                 if (bridgeHandler instanceof CulHandler) {
-                    String rollingCode = p.getProperty("rollingCode", "0000");
-                    String address = p.getProperty("address", "000000");
+                    String rollingCode = p.getProperty("rollingCode");
+                    String address = p.getProperty("address");
                     logger.debug("rolling code before command {}", rollingCode);
 
                     boolean executedSuccessfully = ((CulHandler) bridgeHandler).executeCULCommand(getThing(),
@@ -96,50 +101,56 @@ public class SomfyCULHandler extends BaseThingHandler {
                         p.setProperty("rollingCode", rollingCode);
                         p.setProperty("address", address);
 
-                        storeProperties(p);
+                        try {
+                            p.store(new FileWriter(propertyFile), "no comment");
+                        } catch (IOException e) {
+                            logger.error(e.getMessage(), e);
+                        }
                     }
                 }
             }
         }
     }
 
-    private void storeProperties(Properties p) {
+    /**
+     *
+     *
+     * @return
+     */
+    private Properties initProperties() {
+        p = new Properties();
+        // TODO Calculate new address based on other fields
+        p.setProperty("rollingCode", "0000");
+        p.setProperty("address", "000000");
+
         try {
-            FileWriter fileWriter = new FileWriter(propertyFile);
-            p.store(fileWriter, "no comment");
-            fileWriter.close();
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
 
-    private Properties loadProperties() {
-        Properties p = new Properties();
-
-        if (!propertyFile.exists()) {
-            // TODO Create file during programming the shutter
-            try {
+            if (!propertyFile.exists()) {
                 logger.debug("Trying to create file {}.", propertyFile);
                 Files.createParentDirs(propertyFile);
-                Files.touch(propertyFile);
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
+                FileWriter fileWriter = new FileWriter(propertyFile);
+                p.store(fileWriter, "Initialized fields");
+                fileWriter.close();
+            } else {
+                FileReader fileReader = new FileReader(propertyFile);
+                p.load(fileReader);
+                fileReader.close();
             }
-        }
-        try {
-            FileReader fileReader = new FileReader(propertyFile);
-            p.load(fileReader);
-            fileReader.close();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
         return p;
     }
 
+    /**
+     * The roller shutter is by default initialized and set to online, as there is no feedback that can check if the
+     * shutter is available.
+     *
+     * @see org.eclipse.smarthome.core.thing.binding.BaseThingHandler#initialize()
+     */
     @Override
     public void initialize() {
-        // TODO Initialize new properties file with address++ of existing addresses
-        logger.info("Added roller shutter");
+        logger.info("Initialized roller shutter");
         updateStatus(ThingStatus.ONLINE);
     }
 }
