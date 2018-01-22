@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.core.library.types.StopMoveType;
@@ -60,7 +61,7 @@ public class SomfyCULHandler extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        logger.info("channelUID: " + channelUID + ", command: " + command);
+        logger.info("channelUID: {}, command: {}", channelUID, command);
         if (channelUID.getId().equals(POSITION)) {
             SomfyCommand somfyCommand = null;
             if (command instanceof UpDownType) {
@@ -122,9 +123,8 @@ public class SomfyCULHandler extends BaseThingHandler {
                 Files.createParentDirs(propertyFile);
                 FileWriter fileWriter = new FileWriter(propertyFile);
 
-                // TODO Calculate new address based on other fields
                 p.setProperty("rollingCode", "0000");
-                p.setProperty("address", "000000");
+                p.setProperty("address", String.format("%06X", getNewAddressForShutter()));
                 p.store(fileWriter, "Initialized fields");
                 fileWriter.close();
             } else {
@@ -136,6 +136,31 @@ public class SomfyCULHandler extends BaseThingHandler {
             logger.error(e.getMessage(), e);
         }
         return p;
+    }
+
+    /**
+     * Calculates a new address for the shutter. Therefore all property files are read and a new address is calculated.
+     *
+     * @return New 6-digit address for the shutter
+     * @throws IOException
+     */
+    private long getNewAddressForShutter() throws IOException {
+        File directory = propertyFile.getParentFile();
+        long maxAddress = 0;
+        for (File file : directory.listFiles()) {
+            if (FilenameUtils.getExtension(file.getName()).equals("properties")) {
+                FileReader fileReader = new FileReader(file);
+                Properties other = new Properties();
+                other.load(fileReader);
+                long currentAddress = Long.decode("0x" + other.getProperty("address"));
+                if (currentAddress > maxAddress) {
+                    maxAddress = currentAddress;
+                }
+                fileReader.close();
+            }
+        }
+        logger.info("Current max address is {}", maxAddress);
+        return maxAddress + 1;
     }
 
     /**
