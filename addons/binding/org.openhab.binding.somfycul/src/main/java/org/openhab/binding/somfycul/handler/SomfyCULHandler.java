@@ -85,21 +85,17 @@ public class SomfyCULHandler extends BaseThingHandler {
                 // We delegate the execution to the bridge handler
                 ThingHandler bridgeHandler = getBridge().getHandler();
                 if (bridgeHandler instanceof CulHandler) {
-                    String rollingCode = p.getProperty("rollingCode");
-                    String address = p.getProperty("address");
-                    logger.debug("rolling code before command {}", rollingCode);
+                    logger.debug("rolling code before command {}", p.getProperty("rollingCode"));
 
                     boolean executedSuccessfully = ((CulHandler) bridgeHandler).executeCULCommand(getThing(),
-                            somfyCommand, rollingCode, address);
+                            somfyCommand, p.getProperty("rollingCode"), p.getProperty("address"));
                     if (executedSuccessfully && command instanceof State) {
                         updateState(channelUID, (State) command);
 
-                        long rollCode = Long.decode("0x" + rollingCode);
-                        rollCode++;
-                        rollingCode = String.format("%04X", rollCode);
-                        logger.debug("Updated rolling code to {}", rollingCode);
-                        p.setProperty("rollingCode", rollingCode);
-                        p.setProperty("address", address);
+                        long newRollingCode = Long.decode("0x" + p.getProperty("rollingCode")) + 1;
+                        p.setProperty("rollingCode", String.format("%04X", newRollingCode));
+                        logger.debug("Updated rolling code to {}", p.getProperty("rollingCode"));
+                        p.setProperty("address", p.getProperty("address"));
 
                         try {
                             p.store(new FileWriter(propertyFile), "no comment");
@@ -113,22 +109,22 @@ public class SomfyCULHandler extends BaseThingHandler {
     }
 
     /**
+     * Initializes the properties for the thing (shutter).
      *
-     *
-     * @return
+     * @return Valid properties (address and rollingCode)
      */
     private Properties initProperties() {
         p = new Properties();
-        // TODO Calculate new address based on other fields
-        p.setProperty("rollingCode", "0000");
-        p.setProperty("address", "000000");
 
         try {
-
             if (!propertyFile.exists()) {
                 logger.debug("Trying to create file {}.", propertyFile);
                 Files.createParentDirs(propertyFile);
                 FileWriter fileWriter = new FileWriter(propertyFile);
+
+                // TODO Calculate new address based on other fields
+                p.setProperty("rollingCode", "0000");
+                p.setProperty("address", "000000");
                 p.store(fileWriter, "Initialized fields");
                 fileWriter.close();
             } else {
