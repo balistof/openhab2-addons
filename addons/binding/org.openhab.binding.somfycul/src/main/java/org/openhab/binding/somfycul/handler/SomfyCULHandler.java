@@ -138,7 +138,7 @@ public class SomfyCULHandler extends BaseThingHandler {
 
     @Override
     public void initialize() {
-        // TODO: Thing should only be initialized after proper programming and rolling code be set.
+        // TODO Initialize new properties file with address++ of existing addresses
         logger.info("Added roller shutter");
         updateStatus(ThingStatus.ONLINE);
     }
