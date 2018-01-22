@@ -17,9 +17,10 @@ package org.openhab.binding.somfycul.handler;
  *
  */
 public enum SomfyCommand {
+    MY("1"),
     UP("2"),
     DOWN("4"),
-    MY("1");
+    PROG("8");
 
     private String actionKey;
 
