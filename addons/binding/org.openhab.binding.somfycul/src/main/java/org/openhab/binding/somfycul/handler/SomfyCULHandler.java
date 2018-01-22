@@ -98,7 +98,7 @@ public class SomfyCULHandler extends BaseThingHandler {
                         p.setProperty("address", p.getProperty("address"));
 
                         try {
-                            p.store(new FileWriter(propertyFile), "no comment");
+                            p.store(new FileWriter(propertyFile), "Last command: " + somfyCommand);
                         } catch (IOException e) {
                             logger.error(e.getMessage(), e);
                         }
