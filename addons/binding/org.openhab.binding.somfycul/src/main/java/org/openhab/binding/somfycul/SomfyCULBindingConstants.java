@@ -38,4 +38,9 @@ public class SomfyCULBindingConstants {
      */
     public static final String POSITION = "position";
 
+    /**
+     * Rollershutter's program
+     */
+    public static final String PROGRAM = "program";
+
 }

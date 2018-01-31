@@ -8,7 +8,7 @@
  */
 package org.openhab.binding.somfycul.handler;
 
-import static org.openhab.binding.somfycul.SomfyCULBindingConstants.POSITION;
+import static org.openhab.binding.somfycul.SomfyCULBindingConstants.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -19,6 +19,7 @@ import java.util.Properties;
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.ConfigConstants;
+import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StopMoveType;
 import org.eclipse.smarthome.core.library.types.UpDownType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -62,8 +63,8 @@ public class SomfyCULHandler extends BaseThingHandler {
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         logger.info("channelUID: {}, command: {}", channelUID, command);
+        SomfyCommand somfyCommand = null;
         if (channelUID.getId().equals(POSITION)) {
-            SomfyCommand somfyCommand = null;
             if (command instanceof UpDownType) {
                 switch ((UpDownType) command) {
                     case UP:
@@ -81,28 +82,36 @@ public class SomfyCULHandler extends BaseThingHandler {
                     default:
                         break;
                 }
+
             }
-            if (somfyCommand != null) {
-                // We delegate the execution to the bridge handler
-                ThingHandler bridgeHandler = getBridge().getHandler();
-                if (bridgeHandler instanceof CulHandler) {
-                    logger.debug("rolling code before command {}", p.getProperty("rollingCode"));
+        } else if (channelUID.getId().equals(PROGRAM)) {
+            if (command instanceof OnOffType) {
+                // Don't check for on/off - always trigger program mode
+                somfyCommand = SomfyCommand.PROG;
+            }
+        }
+        if (somfyCommand != null)
 
-                    boolean executedSuccessfully = ((CulHandler) bridgeHandler).executeCULCommand(getThing(),
-                            somfyCommand, p.getProperty("rollingCode"), p.getProperty("address"));
-                    if (executedSuccessfully && command instanceof State) {
-                        updateState(channelUID, (State) command);
+        {
+            // We delegate the execution to the bridge handler
+            ThingHandler bridgeHandler = getBridge().getHandler();
+            if (bridgeHandler instanceof CulHandler) {
+                logger.debug("rolling code before command {}", p.getProperty("rollingCode"));
 
-                        long newRollingCode = Long.decode("0x" + p.getProperty("rollingCode")) + 1;
-                        p.setProperty("rollingCode", String.format("%04X", newRollingCode));
-                        logger.debug("Updated rolling code to {}", p.getProperty("rollingCode"));
-                        p.setProperty("address", p.getProperty("address"));
+                boolean executedSuccessfully = ((CulHandler) bridgeHandler).executeCULCommand(getThing(), somfyCommand,
+                        p.getProperty("rollingCode"), p.getProperty("address"));
+                if (executedSuccessfully && command instanceof State) {
+                    updateState(channelUID, (State) command);
 
-                        try {
-                            p.store(new FileWriter(propertyFile), "Last command: " + somfyCommand);
-                        } catch (IOException e) {
-                            logger.error(e.getMessage(), e);
-                        }
+                    long newRollingCode = Long.decode("0x" + p.getProperty("rollingCode")) + 1;
+                    p.setProperty("rollingCode", String.format("%04X", newRollingCode));
+                    logger.debug("Updated rolling code to {}", p.getProperty("rollingCode"));
+                    p.setProperty("address", p.getProperty("address"));
+
+                    try {
+                        p.store(new FileWriter(propertyFile), "Last command: " + somfyCommand);
+                    } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
                     }
                 }
             }

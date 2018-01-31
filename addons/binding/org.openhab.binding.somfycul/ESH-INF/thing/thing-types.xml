@@ -24,6 +24,7 @@
 		<description>somfyDeviceDescription</description>
 		<channels>
 			<channel id="position" typeId="position" />
+			<channel id="program" typeId="program" />
 		</channels>
 	</thing-type>
 	
@@ -31,6 +32,12 @@
         <item-type>Rollershutter</item-type>
         <label>positionChannelLabel</label>
         <description>positionChannelDescription</description>
+    </channel-type>
+    
+    <channel-type id="program">
+        <item-type>Switch</item-type>
+        <label>programChannelLabel</label>
+        <description>programChannelDescription</description>
     </channel-type>
 
 </thing:thing-descriptions>
