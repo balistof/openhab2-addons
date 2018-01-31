@@ -22,6 +22,7 @@ import org.eclipse.smarthome.config.core.ConfigConstants;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StopMoveType;
 import org.eclipse.smarthome.core.library.types.UpDownType;
+import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -90,11 +91,10 @@ public class SomfyCULHandler extends BaseThingHandler {
                 somfyCommand = SomfyCommand.PROG;
             }
         }
-        if (somfyCommand != null)
-
-        {
+        Bridge bridge = getBridge();
+        if (somfyCommand != null && bridge != null) {
             // We delegate the execution to the bridge handler
-            ThingHandler bridgeHandler = getBridge().getHandler();
+            ThingHandler bridgeHandler = bridge.getHandler();
             if (bridgeHandler instanceof CulHandler) {
                 logger.debug("rolling code before command {}", p.getProperty("rollingCode"));
 
